@@ -61,10 +61,18 @@ skill correctness:
 
 ## Installation
 
-Copy or symlink the skill directories into your agent's skills folder:
+Copy the skill directories into your project's agent skills folder (or global plugin folder):
 
 ```bash
-# Example for Antigravity/Gemini agents
+# For Android Studio AI Agent (project-level)
+mkdir -p <project-root>/.android-studio/skills
+cp -r ink-app-builder ink-custom-brush-builder <project-root>/.android-studio/skills/
+
+# For Gemini CLI / Antigravity (project-level)
+mkdir -p <project-root>/.agents/skills
+cp -r ink-app-builder ink-custom-brush-builder <project-root>/.agents/skills/
+
+# Global Antigravity / Gemini plugin folder
 cp -r ink-app-builder/ ~/.gemini/config/plugins/your-plugin/skills/
 cp -r ink-custom-brush-builder/ ~/.gemini/config/plugins/your-plugin/skills/
 ```
