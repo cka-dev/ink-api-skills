@@ -31,11 +31,28 @@ androidx-ink-geometry-compose  = { group = "androidx.ink", name = "ink-geometry-
 
 # Motion prediction (optional but recommended)
 androidx-input-motionprediction = { module = "androidx.input:input-motionprediction", version.ref = "inputMotionPrediction" }
+
+# Persistence (kotlinx.serialization + Room with KSP)
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+androidx-room-runtime  = { group = "androidx.room", name = "room-runtime",  version.ref = "room" }
+androidx-room-ktx      = { group = "androidx.room", name = "room-ktx",      version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp                  = { id = "com.google.devtools.ksp",                   version.ref = "ksp" }
 ```
 
 ### `app/build.gradle.kts`
 
 ```kotlin
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp) // Required if using Room in Kotlin
+}
+
 dependencies {
     // Ink core
     implementation(libs.androidx.ink.authoring)
@@ -54,6 +71,12 @@ dependencies {
 
     // Motion prediction (optional)
     implementation(libs.androidx.input.motionprediction)
+
+    // Persistence (kotlinx.serialization + Room)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler) // NEVER use annotationProcessor() in Kotlin!
 }
 ```
 
@@ -108,3 +131,4 @@ android {
 - **Missing Compose modules**: If you only add `ink-brush` but not `ink-brush-compose`, extension functions like `Brush.createWithComposeColor()` will be unavailable.
 - **Missing `ink-authoring-android`**: The `ink-authoring-compose` module depends on `ink-authoring-android` at runtime. Omitting it causes `ClassNotFoundException`.
 - **Forgetting motion prediction**: While optional, `androidx.input:input-motionprediction` significantly improves drawing smoothness. Include it for any production-quality app.
+- **Using `annotationProcessor(libs.androidx.room.compiler)` instead of `ksp(...)`**: In Kotlin projects, `annotationProcessor` only runs on Java sources and is a no-op for Kotlin `@Database` classes, causing `RuntimeException: Cannot find implementation for AppDatabase. AppDatabase_Impl does not exist` at launch. Always use `ksp(libs.androidx.room.compiler)` with the `com.google.devtools.ksp` plugin (or use `context.filesDir` JSON/binary file persistence if KSP is not configured).

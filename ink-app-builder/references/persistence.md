@@ -364,6 +364,8 @@ fun decodeBrushFamily(
 
 ## Room Database Integration
 
+> **Important (Use `ksp`, Never `annotationProcessor`)**: When using Room in a Kotlin project, you **must** apply the `com.google.devtools.ksp` plugin and use `ksp(libs.androidx.room.compiler)` in `app/build.gradle.kts`. Using `annotationProcessor(libs.androidx.room.compiler)` only processes Java sources and is a no-op for Kotlin `@Database` classes, causing `RuntimeException: Cannot find implementation for AppDatabase. AppDatabase_Impl does not exist` at launch. If your project does not have KSP configured (e.g., on bleeding-edge AGP alphas without a matching KSP version), you can persist the `List<String>` of serialized stroke JSON strings and `.inkbrush` byte files directly in `context.filesDir` using `kotlinx.serialization.json.Json` instead of Room.
+
 ### Entity with Stroke Data
 
 Use `List<String>` on the entity so Room automatically applies the `@TypeConverter` when reading and writing:
@@ -477,4 +479,5 @@ init {
 - **Passing `maxVersion = Version.DEVELOPMENT` when targeting `1.0.0` stable**: The `androidx.ink.brush.Version` class became public in `1.1.0-alpha03+` (it does not exist in `1.0.0` stable). Omit `maxVersion` if you need `1.0.0` compatibility, or pass `maxVersion = Version.DEVELOPMENT` / `Version.MAX_SUPPORTED` on `1.1.0-alpha03+`.
 - **Re-deserializing on every Room `Flow` emission**: If you collect a Room `Flow<DocumentEntity>` in `init` and call `saveStrokes()` after every stroke, each save triggers a new `Flow` emission and re-deserializes all strokes. Prefer a one-shot `loadStrokes(documentId)` on `init` while keeping in-memory `history` as the active session's source of truth.
 - **Blocking the main thread with serialization**: Stroke serialization can be CPU-intensive for large drawings. Always run `saveStrokes()` and `loadStrokes()` on `Dispatchers.IO`.
+- **Using `annotationProcessor` instead of `ksp` for Room**: `annotationProcessor(libs.androidx.room.compiler)` does not process Kotlin `@Database` classes and crashes at runtime with `AppDatabase_Impl does not exist`. Use `ksp(libs.androidx.room.compiler)` with `com.google.devtools.ksp`, or persist serialized stroke JSON and `.inkbrush` files directly in `context.filesDir`.
 - **Not persisting after undo/redo/erase**: Every mutation to the stroke list should trigger a save. Missing a save point means state is lost on process death.
