@@ -83,7 +83,7 @@ class AppTextureBitmapStore(context: Context) : TextureBitmapStore {
 
 ### Generation Counter Pattern
 
-The `_generation` `StateFlow` increments every time a new texture is loaded. Because `CanvasStrokeRenderer` (and `InProgressStrokes`'s internal renderer) caches `Paint` / `BitmapShader` instances per `BrushPaint` on first draw, UI layers should recreate `CanvasStrokeRenderer` via `remember(textureStore, generation)` and re-key `InProgressStrokes` via `key(generation)` when textures become available:
+The `_generation` `StateFlow` increments every time a new texture is loaded. Because `CanvasStrokeRenderer` (and `InProgressStrokes`'s internal renderer) caches `Paint` / `BitmapShader` instances per `BrushPaint` on first draw, UI layers must recreate `CanvasStrokeRenderer` via `remember(textureStore, generation)` and re-key `InProgressStrokes` via `key(generation)` when textures become available:
 
 ```kotlin
 import androidx.compose.runtime.getValue
@@ -169,7 +169,7 @@ In `BrushPaint`, texture layers are blended sequentially (`layer[0]` → `layer[
   - `BlendMode.DST_IN`: Keeps the brush color (`Color_dst`) while multiplying its alpha by the texture's alpha (`Alpha_src * Alpha_dst`).
   - `BlendMode.DST_OUT`: Keeps the brush color where the texture is transparent (`(1 - Alpha_src) * Alpha_dst`).
   - `BlendMode.SRC_ATOP` / `BlendMode.SRC_IN`: Uses texture color where the brush stroke is opaque while scaling alpha by `Alpha_dst`.
-- **Intermediate `TextureLayer`s only** (when `textureLayers.size > 1`, before the last layer): Modes such as `BlendMode.SRC_OVER`, `DST_OVER`, `SRC`, `DST`, `SRC_OUT`, `DST_ATOP`, and `XOR` do not have output alpha proportional to `Alpha_dst` and should **not** be used on the final `TextureLayer` (doing so overrides anti-aliasing and per-vertex opacity).
+- **Intermediate `TextureLayer`s only** (when `textureLayers.size > 1`, before the last layer): Modes such as `BlendMode.SRC_OVER`, `DST_OVER`, `SRC`, `DST`, `SRC_OUT`, `DST_ATOP`, and `XOR` do not have output alpha proportional to `Alpha_dst` and must **not** be used on the final `TextureLayer` (doing so overrides anti-aliasing and per-vertex opacity).
 
 ## Adding a Texture to a Paint
 
@@ -235,7 +235,7 @@ fun decodeFamilyWithTextures(
 - **Using `BlendMode.SRC_OVER` on the final (or only) `TextureLayer`** — `SRC_OVER` output alpha (`Alpha_src + (1 - Alpha_src) * Alpha_dst`) is not proportional to `Alpha_dst`, which overrides edge anti-aliasing and ignores `OPACITY_MULTIPLIER` behaviors wherever the texture is opaque. Use `BlendMode.MODULATE` (default), `DST_IN`, `DST_OUT`, `SRC_ATOP`, or `SRC_IN` on the final `TextureLayer`.
 - **Using `StampingTexture` without a fallback `BrushPaint` in `paintPreferences`** — `BrushPaint.StampingTexture` requires `CanvasMeshRenderer` (Android 14 / API 34+ hardware `Canvas`) and cannot be rendered by `CanvasPathRenderer` (API ≤ 33 or software `Canvas(bitmap)`). Provide a fallback `BrushPaint` in `BrushCoat.paintPreferences` if the coat must also render on API ≤ 33 or when exporting to a `Bitmap`.
 - **Instantiating abstract `BrushPaint.TextureLayer(...)` directly** — In `1.1.0-alpha03+`, `BrushPaint.TextureLayer` is an abstract class. Instantiate `BrushPaint.TilingTexture(...)` or `BrushPaint.StampingTexture(...)` instead (`SizeUnit`, `BlendMode`, and `Wrap` remain nested on `BrushPaint.TextureLayer.*`, while `Origin` is nested on `BrushPaint.TilingTexture.Origin`).
-- **Not normalizing texture IDs** — The Ink API may prefix IDs with `ink://ink/texture:`. Your store should strip this prefix to match your internal IDs.
-- **Very large bitmap textures** — Textures are tiled along the stroke, so large images waste memory. Keep textures 256×256 or 512×512 pixels.
+- **Not normalizing texture IDs** — The Ink API may prefix IDs with `ink://ink/texture:`. Strip this prefix in `TextureBitmapStore` to match internal IDs.
+- **Oversized bitmap textures** — Textures are tiled along the stroke, so high-resolution bitmaps waste memory. Keep textures at 256×256 or 512×512 pixels.
 - **Not incrementing the generation counter** — After loading new textures, UI components won't re-render unless notified. Increment a generation counter or use another reactive signal.
 - **Forgetting `@OptIn(ExperimentalInkCustomBrushApi::class)` on `1.0.0` stable** — Required when decoding/encoding pre-serialized brushes on `1.0.0` stable (not required in `1.1.0-alpha02+`).

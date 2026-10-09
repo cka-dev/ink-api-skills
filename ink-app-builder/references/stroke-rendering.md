@@ -22,7 +22,7 @@ val renderer = CanvasStrokeRenderer.create(textureStore = myTextureStore)
 |---|---|---|---|
 | `textureStore` | `TextureBitmapStore` | `TextureBitmapStore { null }` | Provides bitmaps for textured brushes. Required for emoji/custom texture brushes (non-nullable; do not pass `null`). |
 
-> **Note on Offscreen / Software `Canvas` Rendering**: Starting in `1.0.0` (Stable), `CanvasStrokeRenderer.create(textureStore)` automatically detects software canvases (`!canvas.isHardwareAccelerated`, such as `Canvas(bitmap)`) and falls back to path rendering (`Canvas.drawPath`). The 2-argument `CanvasStrokeRenderer.create(forcePathRendering = true, textureStore)` overload seen in early `1.0.0-alpha` samples is `@RestrictTo(LIBRARY_GROUP)` (and `@InkInternalOnlyApi` in `1.1.0-alpha09+`) and should **not** be called in app code.
+> **Note on Offscreen / Software `Canvas` Rendering**: Starting in `1.0.0` (Stable), `CanvasStrokeRenderer.create(textureStore)` automatically detects software canvases (`!canvas.isHardwareAccelerated`, such as `Canvas(bitmap)`) and falls back to path rendering (`Canvas.drawPath`). The 2-argument `CanvasStrokeRenderer.create(forcePathRendering = true, textureStore)` overload seen in early `1.0.0-alpha` samples is `@RestrictTo(LIBRARY_GROUP)` (and `@InkInternalOnlyApi` in `1.1.0-alpha09+`) and must **not** be called in app code.
 
 ### Re-creating with Texture Cache
 
@@ -75,11 +75,11 @@ canvasStrokeRenderer.draw(
 )
 ```
 
-The `strokeToScreenTransform` matrix maps stroke coordinates to screen coordinates. Use `Matrix()` (identity) when strokes are stored in screen coordinates. For pan/zoom scenarios, pass the appropriate transformation matrix.
+The `strokeToScreenTransform` matrix maps stroke coordinates to screen coordinates. Use `Matrix()` (identity) when strokes are stored in screen coordinates. For pan/zoom scenarios, pass the active world-to-screen transformation matrix.
 
 ## Blend Modes for Brush Types
 
-Different brush families require different blend modes. Highlighter brushes, for example, should use `BlendMode.Multiply` to create a translucent highlight effect over existing content.
+Different brush families require different blend modes. Use `BlendMode.Multiply` for highlighter brushes to create a translucent highlight effect over existing content.
 
 ### Per-Stroke Blend Mode with `withSaveLayer`
 

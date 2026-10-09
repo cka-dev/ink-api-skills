@@ -78,7 +78,7 @@ val family = BrushFamily(
 
 ### Shortcut for Single-Coat Families
 
-For simple brushes with a single coat, use the `tip` + `paint` shortcut on `BrushFamily`:
+For single-coat brushes, use the `tip` + `paint` shortcut on `BrushFamily`:
 
 ```kotlin
 import androidx.ink.brush.BrushFamily
@@ -92,7 +92,7 @@ val familyShortcut = BrushFamily(
 )
 ```
 
-> **Optional `BrushFamily` Parameters:** Both public constructors also accept optional `inputModel: BrushFamily.InputModel = BrushFamily.InputModel.DEFAULT_INPUT_MODEL` and `developerComment: String = ""` parameters (pass them as **named arguments**, e.g., `inputModel = BrushFamily.InputModel.DEFAULT_INPUT_MODEL, developerComment = "my-brush"`). In `1.1.0-alpha03+`, `BrushFamily.InputModel` publicly exposes `DEFAULT_INPUT_MODEL` (default `SlidingWindowModel()`), `PASSTHROUGH_MODEL` (minimal modeling for pre-modeled inputs), and `SlidingWindowModel(windowDurationMillis: Long, upsamplingFrequencyHz: Int)` (custom smoothing window in ms and upsampling rate in Hz, or `0` to disable upsampling). Note that `clientBrushFamilyId: String` remains annotated `@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)` across `1.0.0` and `1.1.0-alpha`.
+> **Optional `BrushFamily` Parameters:** Both public constructors also accept optional `inputModel: BrushFamily.InputModel = BrushFamily.InputModel.DEFAULT_INPUT_MODEL` and `developerComment: String = ""` parameters (pass them as **named arguments**, e.g., `inputModel = BrushFamily.InputModel.DEFAULT_INPUT_MODEL, developerComment = "my-brush"`). In `1.1.0-alpha03+`, `BrushFamily.InputModel` publicly exposes `DEFAULT_INPUT_MODEL` (default `SlidingWindowModel()`), `PASSTHROUGH_MODEL` (unsmoothed pass-through for pre-modeled inputs), and `SlidingWindowModel(windowDurationMillis: Long, upsamplingFrequencyHz: Int)` (custom smoothing window in ms and upsampling rate in Hz, or `0` to disable upsampling). Note that `clientBrushFamilyId: String` remains annotated `@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)` across `1.0.0` and `1.1.0-alpha`.
 
 ## Creating a Brush Instance
 

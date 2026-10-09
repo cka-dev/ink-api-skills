@@ -91,7 +91,7 @@ fun jitterBehavior(
 
 ---
 
-## Recipe 1: Simple Pressure Pen
+## Recipe 1: Pressure-Sensitive Pen
 
 A basic pen where stylus pressure controls both size and opacity. Uses `SelfOverlap.ANY` so the mesh renderer can apply the per-vertex `OPACITY_MULTIPLIER` behavior.
 

@@ -1,6 +1,6 @@
 # Architecture
 
-Reference for the recommended MVVM architecture when building an Ink-based drawing app with Jetpack Compose.
+Reference for the MVVM architecture when building an Ink-based drawing app with Jetpack Compose.
 
 ## Architecture Overview
 
@@ -182,7 +182,7 @@ fun DrawingScreen(
 
 ### Why `collectAsStateWithLifecycle` + Synchronous Handoff in `DrawingSurface`?
 
-- `collectAsStateWithLifecycle()` automatically stops collection when the lifecycle is below `STARTED` (e.g., app is backgrounded), preventing unnecessary recompositions after `onStop`. Prefer it over plain `collectAsState()` for `StateFlow`s in the ViewModel.
+- `collectAsStateWithLifecycle()` automatically stops collection when the lifecycle is below `STARTED` (e.g., app is backgrounded), preventing unnecessary recompositions after `onStop`. Always use `collectAsStateWithLifecycle()` instead of `collectAsState()` for `StateFlow`s in the ViewModel.
 - **Important (Wet-to-Dry Handoff)**: Because `collectAsStateWithLifecycle()` collects `StateFlow` emissions asynchronously via a coroutine (`produceState`), updating `_uiState` in `viewModel.onStrokesFinished()` does not update `uiState.strokes` until the next UI run loop — whereas `InProgressStrokes` removes the completed wet stroke immediately after `onStrokesFinished` returns. Ensure `DrawingSurface` includes the synchronous `pendingStrokes` Compose state buffer (see [drawing-surface.md](drawing-surface.md)) so the dry `Canvas` is invalidated in the exact same UI thread run loop without a 1-frame flicker.
 
 ## Hilt Dependency Injection
@@ -240,7 +240,7 @@ object AppModule {
 
 ### TextureBitmapStore as Singleton
 
-The `TextureBitmapStore` should be a `@Singleton` so that loaded textures persist across screen rotations and navigation:
+Annotate `TextureBitmapStore` with `@Singleton` so that loaded textures persist across screen rotations and navigation:
 
 ```kotlin
 import android.content.Context
@@ -259,7 +259,7 @@ class AppTextureBitmapStore @Inject constructor(
 
 ## Repository Pattern
 
-The repository encapsulates all data operations and provides a clean API to the ViewModel:
+The repository encapsulates all data operations and exposes suspend functions and `Flow`s to the ViewModel:
 
 ```kotlin
 import androidx.ink.strokes.Stroke
@@ -272,7 +272,7 @@ interface StrokeRepository {
 }
 ```
 
-The ViewModel should never directly access DAOs or serialization utilities.
+The ViewModel must never directly access DAOs or serialization utilities.
 
 ## Persisting on Every Mutation vs. `onCleared()`
 
@@ -282,8 +282,8 @@ Persist strokes immediately (on `Dispatchers.IO`) after each user action that mu
 
 ## Common Pitfalls
 
-- **Exposing `MutableStateFlow` to UI**: Always expose read-only `StateFlow` via `asStateFlow()`. The UI should never mutate ViewModel state directly.
-- **Creating `CanvasStrokeRenderer` in ViewModel**: The renderer should be created in the Composable layer because it depends on the texture store's generation state and should be re-created on texture changes.
+- **Exposing `MutableStateFlow` to UI**: Always expose read-only `StateFlow` via `asStateFlow()`. The UI must never mutate ViewModel state directly.
+- **Creating `CanvasStrokeRenderer` in ViewModel**: Create the renderer in the Composable layer because it depends on the texture store's generation state and must be re-created on texture changes.
 - **Forgetting `@HiltViewModel`**: Without this annotation, Hilt cannot inject the ViewModel and `hiltViewModel()` will crash.
 - **Not using `SavedStateHandle` for navigation args**: When navigating to a drawing screen with a document ID, extract it from `SavedStateHandle` rather than passing it via constructor parameters.
-- **Tight coupling between layers**: The ViewModel should depend on the repository interface, not the concrete implementation. This enables testing with fake repositories.
+- **Tight coupling between layers**: The ViewModel must depend on the repository interface, not the concrete implementation. This enables testing with fake repositories.

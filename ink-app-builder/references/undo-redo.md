@@ -213,7 +213,7 @@ IconButton(
 
 Each history entry holds a `List<Stroke>`, which references `Stroke` objects. Because strokes are immutable, entries share `Stroke` instances — only the list allocation is duplicated, not the stroke data.
 
-For apps with very long editing sessions, consider capping history length:
+For apps with long editing sessions, cap history length to bound memory usage:
 
 ```kotlin
 private val maxHistorySize = 50
@@ -240,6 +240,6 @@ private fun updateStrokes(newStrokes: List<Stroke>) {
 
 - **Not truncating future on new edit**: If you append without clearing `history.subList(historyIndex + 1, ...)`, redo will navigate to stale states that don't account for the new edit.
 - **Forgetting to seed history on init**: If history is empty when the user first draws, `historyIndex` math breaks. Always add the initial state (even if it's `emptyList()`).
-- **Not saving after undo/redo**: The persistent storage should reflect the current view state. Forgetting `saveStrokes()` after undo/redo means closing and reopening the app loses the undo/redo result.
+- **Not saving after undo/redo**: Persistent storage must reflect the current view state. Forgetting `saveStrokes()` after undo/redo means closing and reopening the app loses the undo/redo result.
 - **Reading strokes from `_uiState` instead of `history[historyIndex]`**: Always use the history as the source of truth. The UI state is a projection of the history.
-- **Unbounded history growth**: In long sessions, history can consume significant memory. Consider capping with `maxHistorySize`.
+- **Unbounded history growth**: In long sessions, history can consume significant memory. Cap the stack size with `maxHistorySize` (e.g., `50`).

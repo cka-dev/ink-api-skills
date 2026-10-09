@@ -21,7 +21,7 @@ implementation(libs.androidx.input.motionprediction)
 
 The `androidx.input.motionprediction` library predicts future touch/stylus points based on the current input trajectory. This reduces perceived latency by rendering predicted points ahead of the actual input.
 
-The `InProgressStrokes` composable integrates with motion prediction automatically when the dependency is available on the classpath. No additional code is required — simply including the dependency enables the feature.
+The `InProgressStrokes` composable integrates with motion prediction automatically when the dependency is available on the classpath. No additional code is required — including the dependency enables the feature.
 
 ### Impact
 
@@ -31,7 +31,7 @@ The `InProgressStrokes` composable integrates with motion prediction automatical
 | ~20-50ms perceived latency | Near-zero perceived latency |
 | Acceptable for finger input | Critical for stylus input |
 
-> **Recommendation**: Always include the motion prediction dependency for production apps, especially those targeting stylus input.
+> **Requirement**: Always include the motion prediction dependency for production apps targeting stylus input.
 
 ## Bitmap Export
 
@@ -116,7 +116,7 @@ fun saveBitmapToFile(bitmap: Bitmap, file: File): Uri {
 
 - **Automatic path rendering fallback**: Starting in `1.0.0` (Stable), `CanvasStrokeRenderer.create(textureStore)` automatically detects software `Bitmap` canvases (`!canvas.isHardwareAccelerated`) and falls back to `Canvas.drawPath`. Do **not** call the 2-arg `CanvasStrokeRenderer.create(forcePathRendering = true, textureStore)` overload — it is `@RestrictTo(LIBRARY_GROUP)` (and `@InkInternalOnlyApi` in `1.1.0-alpha09+`).
 - Use the canvas dimensions from the current view size for 1:1 export, or specify custom dimensions for thumbnails.
-- Background images should be scaled to fill (`maxOf(scaleX, scaleY)`) and centered.
+- Scale background images to fill (`maxOf(scaleX, scaleY)`) and center them on the canvas.
 
 ## Drag & Drop Coexistence
 
@@ -350,7 +350,7 @@ key(cacheGen) {
 ## Common Pitfalls
 
 - **Calling `forcePathRendering = true` in export**: The 2-arg `CanvasStrokeRenderer.create(forcePathRendering, textureStore)` overload is `@RestrictTo(LIBRARY_GROUP)`. Use `CanvasStrokeRenderer.create(textureStore)`, which automatically falls back to path rendering on software `Bitmap` canvases.
-- **Not normalizing texture IDs**: The Ink API may prefix texture IDs with `ink://ink/texture:`. Your `TextureBitmapStore` should strip these prefixes for consistent lookup.
+- **Not normalizing texture IDs**: The Ink API may prefix texture IDs with `ink://ink/texture:`. Strip these prefixes in `TextureBitmapStore` for consistent lookup.
 - **Drag & drop blocking InProgressStrokes**: Without `pointerInputWithSiblingFallthrough`, the drag handler consumes all touch events, preventing any drawing.
 - **Order of composable children in Box**: In Compose, the last child in a `Box` is hit-tested first and stops sibling hit-testing unless `sharePointerInputWithSiblings()` is `true`. Place the `pointerInputWithSiblingFallthrough` gesture interceptor *after* `InProgressStrokes` so both siblings receive pointer events.
 - **TextureBitmapStore not being a Singleton**: If multiple instances exist, textures loaded in one won't be available in another. Use `@Singleton` scope.

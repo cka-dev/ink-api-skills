@@ -27,7 +27,7 @@ The tip shape is an ellipse (or rectangle, depending on `cornerRounding`) whose 
 | Circular tip | 1.0 | 1.0 | Uniform round mark |
 | Wide flat stroke | 2.0 | 0.5 | Broad horizontal mark |
 | Tall narrow stroke | 0.3 | 1.0 | Thin vertical mark |
-| Large uniform | 2.0 | 2.0 | Double-size round mark |
+| 2x uniform | 2.0 | 2.0 | Double-size round mark |
 
 ## Corner Rounding Progression
 

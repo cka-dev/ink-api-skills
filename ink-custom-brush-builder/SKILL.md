@@ -1,12 +1,14 @@
 ---
 name: ink-custom-brush-builder
 description: >-
-  Guides developers in creating custom brushes for the Android Jetpack Ink
-  API. Use when a developer wants to build custom brush families, configure
-  brush tips, add pressure/tilt/speed sensitivity via brush behaviors, add
-  textures, create multi-coat brushes, or serialize/deserialize brush
-  definitions. Covers the full BrushFamily hierarchy: BrushCoat, BrushTip,
-  BrushPaint, BrushBehavior, TextureLayer, and ColorFunction.
+  Guides developers in creating custom brushes for an Android app or Android
+  project using the Android Jetpack Ink API (androidx.ink). Use this skill
+  when building custom BrushFamily definitions, configuring BrushTip shapes,
+  adding pressure, tilt, speed, or noise sensitivity via BrushBehavior node
+  graphs, adding tiling or particle stamping textures, creating multi-coat
+  brushes, or serializing and deserializing custom brushes. Delivers complete
+  Kotlin BrushFamily, BrushCoat, BrushTip, BrushPaint, BrushBehavior,
+  TextureLayer, and ColorFunction implementations.
 ---
 
 # Building Custom Brushes with the Android Ink API
@@ -44,7 +46,7 @@ val brush = Brush.createWithComposeColor(
 
 ## Quick Start
 
-1. Ensure the project includes `ink-brush`, `ink-brush-compose`, `ink-storage`, and `ink-nativeloader` (see `ink-app-builder` skill's `setup.md` for full Gradle setup).
+1. Add `androidx.ink:ink-brush`, `androidx.ink:ink-brush-compose`, `androidx.ink:ink-storage`, and `androidx.ink:ink-nativeloader` (version `1.1.0-alpha03+` or newer) to `app/build.gradle.kts`.
 2. Read [brush-hierarchy.md](references/brush-hierarchy.md) — understand `BrushFamily` → `BrushCoat` → `BrushTip` + `BrushPaint`
 3. Read [brush-behaviors.md](references/brush-behaviors.md) — add pressure, tilt, speed, or noise responsiveness
 4. Read [examples.md](references/examples.md) — start from a complete recipe (pressure pen, calligraphy, shading pencil, watercolor, multi-coat)
@@ -53,7 +55,7 @@ val brush = Brush.createWithComposeColor(
 
 ## Task Routing
 
-Based on what the developer needs, read the appropriate reference:
+Based on the required task, read the corresponding reference:
 
 ### Understanding the Structure
 | Task | Reference |
@@ -78,11 +80,10 @@ Based on what the developer needs, read the appropriate reference:
 |---|---|
 | Serialize/deserialize brush families | [serialization.md](references/serialization.md) |
 
-### Recipes & App Integration
+### Complete Recipes
 | Task | Reference |
 |---|---|
-| Complete brush recipes (pressure pen, calligraphy, etc.) | [examples.md](references/examples.md) |
-| Render strokes or wire `TextureBitmapStore` into Compose UI | Use the `ink-app-builder` skill |
+| Complete brush recipes (pressure pen, calligraphy, pencil, watercolor, sparkle) | [examples.md](references/examples.md) |
 
 ---
 

@@ -191,15 +191,15 @@ fun setEraserMode(enabled: Boolean) {
 }
 ```
 
-When switching to eraser mode, the brush selection UI should visually indicate the active tool. When switching back to a brush, call `setEraserMode(false)`.
+When switching to eraser mode, update the brush selection UI to visually indicate the active tool. When switching back to a brush, call `setEraserMode(false)`.
 
 ## Tuning Eraser Padding
 
 | Padding Value | Behavior |
 |---|---|
 | `10f–30f` | Precise eraser — must touch the stroke closely |
-| `40f–60f` | Balanced — good default for finger/stylus |
-| `80f+` | Large eraser — erases strokes in a wide area |
+| `40f–60f` | Balanced — standard default for finger/stylus |
+| `80f+` | Wide eraser — erases strokes in a broad area |
 
 ## Compose & Android Graphics Geometry Conversions (`ink-geometry-compose` / `ink-geometry`)
 
@@ -266,4 +266,4 @@ fun getStrokeBounds(stroke: Stroke): Pair<Rect?, RectF?> {
 - **Erasing on every touch point without change detection**: Always check `if (strokesAfter.size != strokesBefore.size)` before updating state. Unnecessary updates trigger recomposition.
 - **Not calling `change.consume()`**: If the pointer change is not consumed, touch events may propagate to siblings and cause unintended behavior.
 - **Using `AffineTransform.IDENTITY` incorrectly with pan/zoom**: In `stroke.shape.intersects(parallelogram, meshToParallelogram)`, the second parameter maps from the `PartitionedMesh`'s coordinate space (stroke/world space) to the `Parallelogram`'s coordinate space. Either transform pointer coordinates (`change.position`) into world/stroke space first (using `pointerEventToWorldTransform`) and pass `AffineTransform.IDENTITY`, or keep `parallelogram` in screen space and pass `meshToParallelogram = MutableAffineTransform().populateFrom(worldToScreenMatrix)` (or `ImmutableAffineTransform.from(worldToScreenMatrix)`).
-- **Not integrating with undo/redo**: Erasing should go through `updateStrokes()` to participate in the undo/redo history. See `undo-redo.md`.
+- **Not integrating with undo/redo**: Route erasing through `updateStrokes()` to participate in the undo/redo history. See `undo-redo.md`.

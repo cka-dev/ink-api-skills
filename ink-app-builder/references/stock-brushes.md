@@ -18,7 +18,7 @@ Reference for the built-in brush families provided by `StockBrushes` and how to 
 
 The emoji highlighter accepts a `clientTextureId` string, an optional `showMiniEmojiTrail` boolean (default `false`), and an optional `selfOverlap: SelfOverlap = SelfOverlap.ANY`:
 
-> **Android U (API 34+) Requirement for `showMiniEmojiTrail`**: Per `StockBrushes.emojiHighlighter` KDoc, the miniature emoji trail coat uses particle stamping (`CanvasMeshRenderer`), which only renders properly starting with **Android 14 (`Build.VERSION_CODES.UPSIDE_DOWN_CAKE`, API 34+)**. On Android 13 and below (API 26–33), it is recommended to set `showMiniEmojiTrail = false` (or `Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE`).
+> **Android U (API 34+) Requirement for `showMiniEmojiTrail`**: Per `StockBrushes.emojiHighlighter` KDoc, the miniature emoji trail coat uses particle stamping (`CanvasMeshRenderer`), which only renders properly starting with **Android 14 (`Build.VERSION_CODES.UPSIDE_DOWN_CAKE`, API 34+)**. On Android 13 and below (API 26–33), always set `showMiniEmojiTrail = false` (or `Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE`).
 
 ```kotlin
 import android.os.Build
@@ -71,17 +71,17 @@ val brush = Brush.createWithComposeColor(
 |---|---|---|
 | `family` | `BrushFamily` | The brush family defining stroke shape and behavior |
 | `color` | `Color` | Compose color for the stroke |
-| `size` | `Float` | Overall stroke width in stroke-space units. Must be finite, strictly positive (`size > 0f`), and **at least as large as `epsilon` (`size >= epsilon`)** |
+| `size` | `Float` | Overall stroke width in stroke-space units. Must be finite, strictly positive (`size > 0f`), and **greater than or equal to `epsilon` (`size >= epsilon`)** |
 | `epsilon` | `Float` | Geometric precision (minimum distance between two points to be considered distinct). Must be finite and strictly positive (`0f < epsilon <= size`). Typical range: `0.01f` to `0.1f` |
 
 ### The `epsilon` Parameter
 
 `epsilon` controls the geometric approximation tolerance of rendered strokes:
 
-- **Smaller values** (e.g., `0.01f`): Higher fidelity curves, more memory/CPU usage. Use for fine drawing tools.
-- **Larger values** (e.g., `0.1f`): Slightly coarser curves, lower resource usage. Suitable for most use cases.
-- **Recommended default**: `0.1f` for general drawing, `0.01f` for precision tools.
-- **Constraint (`size >= epsilon`)**: `Brush` enforces that `size >= epsilon` (as well as `size > 0f` and `epsilon > 0f`). Passing a `size` smaller than `epsilon` (for example, when zooming or scaling a brush down to very small stroke-space units without scaling `epsilon`) throws `IllegalArgumentException`.
+- **Lower values** (e.g., `0.01f`): Higher fidelity curves, more memory/CPU usage. Use for fine drawing tools.
+- **Higher values** (e.g., `0.1f`): Coarser curves, lower resource usage. Suitable for general drawing.
+- **Standard default**: Use `0.1f` for general drawing, or `0.01f` for precision tools.
+- **Constraint (`size >= epsilon`)**: `Brush` enforces that `size >= epsilon` (as well as `size > 0f` and `epsilon > 0f`). Passing a `size` less than `epsilon` (for example, when zooming or scaling a brush down without scaling `epsilon`) throws `IllegalArgumentException`.
 
 ## Modifying Brushes
 
@@ -130,7 +130,7 @@ val currentColor: Color = currentBrush.composeColor
 
 ## Alpha Handling for Highlighter Brushes
 
-Highlighter-type brushes should use reduced alpha to create a semi-transparent effect:
+Use reduced alpha on highlighter-type brushes to create a semi-transparent effect:
 
 ```kotlin
 import android.os.Build
@@ -214,5 +214,5 @@ fun recolorStroke(stroke: Stroke, newColor: Color): Stroke {
 - **Mutating brushes**: `Brush` is immutable. `copy()` and `copyWithComposeColor()` return new instances; they do not modify the original.
 - **Using `createWithComposeColor` without `ink-brush-compose`**: This extension function requires the `ink-brush-compose` dependency. Without it, you must use `Brush.createWithColorLong()` and convert colors manually.
 - **Violating `size >= epsilon`**: `Brush` requires `0f < epsilon <= size`. Setting `size < epsilon` (e.g., `currentBrush.copy(size = 0.05f)` when `epsilon = 0.1f`) throws `IllegalArgumentException` at runtime.
-- **Epsilon too small**: Setting epsilon to very small values (e.g., `0.001f`) dramatically increases memory consumption and stroke data size. Keep it at `0.01f` minimum.
+- **Epsilon below `0.01f`**: Setting `epsilon` below `0.01f` (e.g., `0.001f`) dramatically increases memory consumption and stroke data size. Keep `epsilon >= 0.01f`.
 - **Emoji highlighter without texture store**: Emoji brush families require a `TextureBitmapStore` with the corresponding bitmap loaded. Without it, the brush renders as a plain fill.

@@ -1,12 +1,14 @@
 ---
 name: ink-app-builder
 description: >-
-  Guides developers in building inking and drawing apps using the Android
-  Jetpack Ink API with Jetpack Compose. Use when a developer wants to add
-  freehand drawing, stylus support, digital ink, or inking capabilities to
-  an Android app. Covers setup, drawing surfaces, stroke rendering, brush
-  selection, eraser, undo/redo, stroke persistence, and architecture
-  patterns. Compose-only — does NOT cover View-based (XML) inking.
+  Guides developers in building inking and drawing features in an Android
+  project using the Android Jetpack Ink API (androidx.ink) with Jetpack
+  Compose. Use this skill when adding freehand drawing, stylus input, digital
+  ink, stock brushes, stroke erasing, undo/redo, or stroke persistence to an
+  Android app. Delivers complete Compose drawing surfaces (InProgressStrokes),
+  dry stroke rendering (CanvasStrokeRenderer), geometry-based erasing, and
+  ViewModel/Repository persistence. Compose-only — does NOT cover View-based
+  (XML) inking.
 ---
 
 # Building Inking Apps with the Android Ink API (Compose)
@@ -21,8 +23,8 @@ high-performance, low-latency freehand drawing experiences on Android. It uses a
   `CanvasStrokeRenderer`.
 
 > **Note on Versions & Experimental APIs**:
-> - **Core inking (`ink-app-builder`)** works out of the box with **`androidx.ink` `1.0.0` (Stable)** and **`1.1.0+`** (`InProgressStrokes`, `CanvasStrokeRenderer`, `StockBrushes`, geometry eraser, and `StrokeInputBatch` persistence).
-> - **Programmatic custom brushes (`ink-custom-brush-builder`)** (`BrushFamily(...)`, `BrushCoat`, `BrushTip`, `BrushPaint`, `BrushBehavior`) graduated from `@RestrictTo(LIBRARY_GROUP)` to public API in **`1.1.0-alpha03+`** (in `1.0.0` stable, custom brushes can only be loaded from binary proto assets via `BrushFamily.decode()`).
+> - **Core inking** works out of the box with **`androidx.ink` `1.0.0` (Stable)** and **`1.1.0+`** (`InProgressStrokes`, `CanvasStrokeRenderer`, `StockBrushes`, geometry eraser, and `StrokeInputBatch` persistence).
+> - **Programmatic custom brushes** (`BrushFamily(...)`, `BrushCoat`, `BrushTip`, `BrushPaint`, `BrushBehavior`) graduated from `@RestrictTo(LIBRARY_GROUP)` to public API in **`1.1.0-alpha03+`** (in `1.0.0` stable, custom brushes can only be loaded from binary proto assets via `BrushFamily.decode()`).
 > - In **`1.0.0` (Stable)**, `BrushFamily` serialization (`BrushFamily.encode()`/`decode()`, `AndroidBrushFamilySerialization`, `BrushFamilyDecodeCallback`) requires `@OptIn(ExperimentalInkCustomBrushApi::class)`. In **`1.1.0-alpha02+`**, `BrushFamily` serialization no longer requires `@OptIn` (and in `1.1.0-alpha05+`, `ExperimentalInkCustomBrushApi` itself is internal `@RestrictTo(LIBRARY_GROUP)`, so do not annotate code with it on `1.1.0-alpha03+`).
 
 ---
@@ -40,13 +42,13 @@ For a new project that needs inking:
 
 ## Task Routing
 
-Based on what the developer needs, read the appropriate reference:
+Based on the required task, read the corresponding reference:
 
 ### Setting Up
 | Task | Reference |
 |---|---|
 | Add Ink API dependencies to a project | [setup.md](references/setup.md) |
-| Understand the recommended app architecture | [architecture.md](references/architecture.md) |
+| Structure the MVVM app architecture | [architecture.md](references/architecture.md) |
 
 ### Core Drawing
 | Task | Reference |
@@ -54,7 +56,6 @@ Based on what the developer needs, read the appropriate reference:
 | Create a Compose drawing surface | [drawing-surface.md](references/drawing-surface.md) |
 | Render finalized strokes on a Canvas | [stroke-rendering.md](references/stroke-rendering.md) |
 | Use and switch stock brushes (pen, marker, highlighter, dashed, emoji) | [stock-brushes.md](references/stock-brushes.md) |
-| Build custom `BrushFamily` definitions (behaviors, tips, coats, textures) | Use the `ink-custom-brush-builder` skill |
 
 ### Editing Features
 | Task | Reference |

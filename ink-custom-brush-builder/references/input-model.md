@@ -5,7 +5,7 @@
 The `InputModel` controls how raw stylus/touch input is processed before reaching the brush's behavior graph. It sits at the `BrushFamily` level and affects all coats within the family.
 
 Two models are available on `BrushFamily.InputModel`:
-- **`BrushFamily.InputModel.SlidingWindowModel`** — Smooths input with a time-based window and optionally upsamples for higher-frequency rendering. This is the **recommended default** (`BrushFamily.InputModel.DEFAULT_INPUT_MODEL`).
+- **`BrushFamily.InputModel.SlidingWindowModel`** — Smooths input with a time-based window and optionally upsamples for higher-frequency rendering. This is the **standard default** (`BrushFamily.InputModel.DEFAULT_INPUT_MODEL`).
 - **`BrushFamily.InputModel.PASSTHROUGH_MODEL`** — Passes raw input directly without any smoothing or upsampling.
 
 > **Note:** In the Kotlin `BrushFamily` constructor API (`1.1.0-alpha03+`), `inputModel` defaults to `BrushFamily.InputModel.DEFAULT_INPUT_MODEL`, which is a `BrushFamily.InputModel.SlidingWindowModel()` with default parameters (`windowDurationMillis = 20L`, `upsamplingFrequencyHz = 180`). You can also construct a custom `BrushFamily.InputModel.SlidingWindowModel(windowDurationMillis, upsamplingFrequencyHz)` or use `BrushFamily.InputModel.PASSTHROUGH_MODEL`, and combine it with `DampingNode` in `BrushBehavior` for per-property temporal/distance smoothing. (In legacy `@RestrictTo` `1.1.0-alpha02`, these were nested directly on `BrushFamily` as `BrushFamily.SlidingWindowModel`, `BrushFamily.DEFAULT_INPUT_MODEL`, and `BrushFamily.PASSTHROUGH_MODEL`.)
@@ -88,32 +88,32 @@ val customSlidingWindow = BrushFamily.InputModel.SlidingWindowModel(
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `windowDurationMillis` | `Long` | `20L` | Duration of the smoothing window in milliseconds (typically `1L`–`100L`). Larger values = smoother but more latency. |
-| `upsamplingFrequencyHz` | `Int` | `180` | Minimum frequency (in Hz) at which modeled inputs should occur, or `0` to disable upsampling. |
+| `windowDurationMillis` | `Long` | `20L` | Duration of the smoothing window in milliseconds (typically `1L`–`100L`). Higher values produce smoother curves with increased latency. |
+| `upsamplingFrequencyHz` | `Int` | `180` | Target frequency (in Hz) at which modeled inputs are generated, or `0` to disable upsampling. |
 
 ### Typical Values
 
 | Style | `windowDurationMillis` | `upsamplingFrequencyHz` | Character |
 |-------|------------------------|-------------------------|-----------|
-| Low-latency pen | `10L`–`15L` | `180` | Responsive, minimal latency |
-| Standard brush (`DEFAULT_INPUT_MODEL`) | `20L` | `180` | Good balance of smoothness and responsiveness |
+| Low-latency pen | `10L`–`15L` | `180` | Responsive, low latency |
+| Standard brush (`DEFAULT_INPUT_MODEL`) | `20L` | `180` | Balanced smoothness and responsiveness |
 | Calligraphy | `30L` | `180`–`240` | Smooth curves, slight lag |
 | Slow marker / Airbrush | `50L` | `180` | Very smooth, noticeable lag |
 
 ### Impact on Stroke Quality
 
-- **Smaller `windowDurationMillis`** (e.g., `5L`–`15L`) → More responsive, captures rapid movements, but may show jitter from hardware noise.
-- **Larger `windowDurationMillis`** (e.g., `30L`–`50L`) → Smoother curves, better for slow deliberate strokes, but introduces perceptible latency.
+- **Lower `windowDurationMillis`** (e.g., `5L`–`15L`) → More responsive, captures rapid movements, but may show jitter from hardware noise.
+- **Higher `windowDurationMillis`** (e.g., `30L`–`50L`) → Smoother curves, suited for slow deliberate strokes, but introduces perceptible latency.
 - **Higher `upsamplingFrequencyHz`** (e.g., `180`–`240`) → Higher rendering frequency, smoother visual curves, slightly higher CPU cost.
 - **`upsamplingFrequencyHz = 0`** → Disables upsampling entirely, using only the raw input reporting rate.
 
 ## PassthroughModel (`BrushFamily.InputModel.PASSTHROUGH_MODEL`)
 
-Bypasses all smoothing and upsampling (`inputModel = BrushFamily.InputModel.PASSTHROUGH_MODEL`). Raw input samples are passed directly to the behavior graph with only minimal modeling to derive velocity and acceleration.
+Bypasses all smoothing and upsampling (`inputModel = BrushFamily.InputModel.PASSTHROUGH_MODEL`). Raw input samples are passed directly to the behavior graph, computing only derived velocity and acceleration.
 
 Use `PASSTHROUGH_MODEL` when:
-- You want maximum responsiveness with zero added latency
-- The input device already provides clean, high-frequency data
+- You require maximum responsiveness with zero added latency
+- The input device already provides low-noise, high-frequency data
 - You are feeding pre-smoothed or synthetic inputs into Ink
 
 ## Common Pitfalls

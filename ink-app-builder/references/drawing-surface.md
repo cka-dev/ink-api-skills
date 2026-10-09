@@ -23,7 +23,7 @@ The `InProgressStrokes` composable (from `ink-authoring-compose`) handles touch/
 | `nextBrush` | `() -> Brush?` | Lambda called to get the brush for the *next* stroke (defaults to `{ defaultBrush }`; allows switching brushes between strokes) |
 | `pointerEventToWorldTransform` | `Matrix` | `androidx.compose.ui.graphics.Matrix` mapping pointer input coordinates to world/stroke space (defaults to `IDENTITY_MATRIX`; note this is Compose's `Matrix`, whereas `CanvasStrokeRenderer.draw` takes `android.graphics.Matrix` or `AffineTransform`) |
 | `strokeToWorldTransform` | `Matrix` | `androidx.compose.ui.graphics.Matrix` mapping stroke coordinates to world space (defaults to `IDENTITY_MATRIX`) |
-| `maskPath` | `Path?` | Optional `androidx.compose.ui.graphics.Path` masking regions where wet ink should not render (e.g., under floating toolbars; defaults to `null`) |
+| `maskPath` | `Path?` | Optional `androidx.compose.ui.graphics.Path` masking regions where wet ink must not render (e.g., under floating toolbars; defaults to `null`) |
 | `textureBitmapStore` | `TextureBitmapStore` | Store for custom brush textures (e.g., emoji highlighters). Defaults to `TextureBitmapStore { null }` (non-nullable; do not pass `null`). |
 | `onStrokesFinished` | `(List<Stroke>) -> Unit` | Callback delivering completed `Stroke` objects when the user lifts their finger/stylus |
 
@@ -178,7 +178,7 @@ If `onStrokesFinished` only updates a `MutableStateFlow` in your `ViewModel` and
 2. `collectAsStateWithLifecycle()` collects the `StateFlow` emission via a coroutine (`produceState`), which does **not** synchronously update Compose Snapshot State in the same UI thread run loop.
 3. The dry `Canvas` does not receive the new stroke until frame $N+1$, causing a visible **1-frame flicker** where the stroke disappears on stylus/finger lift.
 
-### Recommended Solution: Self-Contained `pendingStrokes` Buffer in `DrawingSurface`
+### Primary Solution: Self-Contained `pendingStrokes` Buffer in `DrawingSurface`
 
 Encapsulating a `var pendingStrokes by remember { mutableStateOf<List<Stroke>>(emptyList()) }` buffer inside `DrawingSurface` (as shown in the `DrawingSurface` implementation above) solves this cleanly:
 - **Same-frame invalidation**: `pendingStrokes = pendingStrokes + newStrokes` mutates Compose Snapshot State synchronously inside `onStrokesFinished` before `removeCompletedShapes()` runs, invalidating only the `Canvas` draw scope in frame $N$.
@@ -210,7 +210,7 @@ DrawingSurface(
 )
 ```
 
-> **Tip**: For new code, the self-contained `pendingStrokes` buffer inside `DrawingSurface` is preferred because it avoids full-list copies (`clear()` + `addAll()`), avoids a 1-frame `LaunchedEffect` delay on Undo/Redo/Erase, and requires zero boilerplate in parent screens.
+> **Tip**: For new code, always use the self-contained `pendingStrokes` buffer inside `DrawingSurface` because it avoids full-list copies (`clear()` + `addAll()`), avoids a 1-frame `LaunchedEffect` delay on Undo/Redo/Erase, and requires zero boilerplate in parent screens.
 
 ### ViewModel Handler
 

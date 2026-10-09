@@ -12,7 +12,7 @@ Two serialization APIs are available in `androidx.ink.storage`:
 
 ## Encoding (Serialization)
 
-### Simple Encoding (No Textures)
+### Basic Encoding (No Textures)
 
 ```kotlin
 import androidx.ink.brush.BrushFamily
@@ -98,7 +98,7 @@ fun saveBrushToFile(
 
 ## Decoding (Deserialization)
 
-### Simple Decoding
+### Basic Decoding
 
 ```kotlin
 import androidx.ink.brush.BrushFamily

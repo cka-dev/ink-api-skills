@@ -215,7 +215,7 @@ For non-stock brush families, there are two API styles:
 
 > **Note on `@OptIn(ExperimentalInkCustomBrushApi::class)`**: In **`1.0.0` (Stable)**, `BrushFamily.encode()`/`decode()`, `AndroidBrushFamilySerialization`, and `BrushFamilyDecodeCallback` are annotated `@ExperimentalInkCustomBrushApi` and require `@OptIn(ExperimentalInkCustomBrushApi::class)` (`import androidx.ink.brush.ExperimentalInkCustomBrushApi`). In **`1.1.0-alpha02+`**, these serialization methods are unannotated and require no opt-in (in `1.1.0-alpha05+`, `ExperimentalInkCustomBrushApi` itself is `@RestrictTo(LIBRARY_GROUP)`, so omit the `@OptIn` when targeting `1.1.0-alpha03+`).
 
-### Extension Function Style (Kotlin-Preferred)
+### Extension Function Style (Idiomatic Kotlin)
 
 #### Encoding (without textures)
 
@@ -427,7 +427,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 ### Repository Pattern: Save & Load
 
-Run stroke encoding and decoding on `Dispatchers.IO` so large drawings do not block the main thread:
+Run stroke encoding and decoding on `Dispatchers.IO` so drawings with hundreds of strokes do not block the main thread:
 
 ```kotlin
 import androidx.ink.strokes.Stroke
@@ -477,7 +477,7 @@ init {
 - **`ByteArray` in `@Serializable` data classes**: Kotlinx serialization handles `ByteArray` but Kotlin `data class` does not use structural (`contentEquals`) equality for `ByteArray` by default. Override `equals()`/`hashCode()` if you compare `SerializedStroke` instances directly.
 - **Not handling decode errors gracefully**: Corrupted or schema-evolved data will throw exceptions on decode. Always use `try/catch` and return `null` or `emptyList()` for graceful degradation.
 - **Passing `maxVersion = Version.DEVELOPMENT` when targeting `1.0.0` stable**: The `androidx.ink.brush.Version` class became public in `1.1.0-alpha03+` (it does not exist in `1.0.0` stable). Omit `maxVersion` if you need `1.0.0` compatibility, or pass `maxVersion = Version.DEVELOPMENT` / `Version.MAX_SUPPORTED` on `1.1.0-alpha03+`.
-- **Re-deserializing on every Room `Flow` emission**: If you collect a Room `Flow<DocumentEntity>` in `init` and call `saveStrokes()` after every stroke, each save triggers a new `Flow` emission and re-deserializes all strokes. Prefer a one-shot `loadStrokes(documentId)` on `init` while keeping in-memory `history` as the active session's source of truth.
-- **Blocking the main thread with serialization**: Stroke serialization can be CPU-intensive for large drawings. Always run `saveStrokes()` and `loadStrokes()` on `Dispatchers.IO`.
+- **Re-deserializing on every Room `Flow` emission**: If you collect a Room `Flow<DocumentEntity>` in `init` and call `saveStrokes()` after every stroke, each save triggers a new `Flow` emission and re-deserializes all strokes. Use a one-shot `loadStrokes(documentId)` on `init` while keeping in-memory `history` as the active session's source of truth.
+- **Blocking the main thread with serialization**: Stroke serialization is CPU-intensive when documents contain hundreds of strokes. Always run `saveStrokes()` and `loadStrokes()` on `Dispatchers.IO`.
 - **Using `annotationProcessor` instead of `ksp` for Room**: `annotationProcessor(libs.androidx.room.compiler)` does not process Kotlin `@Database` classes and crashes at runtime with `AppDatabase_Impl does not exist`. Use `ksp(libs.androidx.room.compiler)` with `com.google.devtools.ksp`, or persist serialized stroke JSON and `.inkbrush` files directly in `context.filesDir`.
-- **Not persisting after undo/redo/erase**: Every mutation to the stroke list should trigger a save. Missing a save point means state is lost on process death.
+- **Not persisting after undo/redo/erase**: Every mutation to the stroke list must trigger a save. Missing a save point means state is lost on process death.
